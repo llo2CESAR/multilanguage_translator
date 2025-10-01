@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Tradutor para Libras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #videos img {
+            max-width: 150px;
+            margin: 5px;
+        }
+
+        textarea {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Tradutor de Texto para Libras</h1>
+    <textarea id="texto" rows="4" placeholder="Digite o texto aqui..."></textarea><br />
+    <button id="btnTraduzir">Traduzir</button>
+    <h2>Vídeos em Libras:</h2>
+    <div id="videos"></div>
+    <script>
+        document.getElementById('btnTraduzir').addEventListener('click', () => {
+            const texto = document.getElementById('texto').value.trim();
+            if (!texto) {
+                alert('Por favor, digite um texto para traduzir.');
+                return;
+            }
+            fetch('/traduzir_texto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texto })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('videos');
+                    container.innerHTML = '';
+                    if (data.videos && data.videos.length > 0) {
+                        data.videos.forEach(url => {
+                            const img = document.createElement('img');
+                            img.src = url;
+                            img.alt = 'Vídeo Libras';
+                            container.appendChild(img);
+                        });
+                    } else {
+                        container.textContent = 'Nenhum vídeo encontrado para o texto informado.';
+                    }
+                })
+                .catch(err => {
+                    alert('Erro ao traduzir o texto.');
+                    console.error(err);
+                });
+        });
+    </script>
+</body>
+
+</html>
