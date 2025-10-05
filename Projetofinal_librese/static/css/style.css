@@ -1,0 +1,313 @@
+/* ================================================= */
+/* 1. VARIÁVEIS CSS E MODO PADRÃO (CLARO) */
+/* ================================================= */
+
+:root {
+    /* Cores do Tema CLARO */
+    --color-page-bg: #fefefe;        /* Fundo da página */
+    --color-container-bg: #fff;      /* Fundo do container */
+    --color-text-main: #000000;      /* Cor principal do texto */
+    --color-border: #ddd;            /* Cor da borda das caixas de texto */
+    --color-input-bg: #ccd8f0;       /* Fundo do select/input */
+    --color-button-bg: #00003d;      /* Fundo do botão principal */
+    --color-button-hover: #003bb3;   /* Fundo do botão hover */
+    --color-shadow: rgba(0, 0, 0, 0.1); /* Sombra do container */
+    --color-button-font: #ccd8f0;
+    --color-text-hover: #fefefe;
+}
+
+/* ================================================= */
+/* 2. MODO ESCURO (SOBRESCREVE AS VARIÁVEIS) */
+/* ================================================= */
+
+body.dark-theme {
+    /* Cores do Tema ESCURO */
+    --color-page-bg: #00003d;
+    --color-container-bg: #00003d;
+    --color-text-main: #fff;
+    --color-border: #444;
+    --color-input-bg: #444;
+    --color-button-bg: #ccd8f0;
+    --color-button-hover: #003bb3;
+    --color-shadow: rgba(255, 255, 255, 0.1);
+    --color-button-font: #444;
+    --color-text-hover: #fefefe;
+}
+
+/* ================================================= */
+/* 3. ESTILOS GERAIS (USANDO AS VARIÁVEIS) */
+/* ================================================= */
+
+body {
+    font-family: Arial, sans-serif;
+    /* Aplica a variável de cor de fundo da página */
+    background-color: var(--color-page-bg); 
+    color: var(--color-text-main); /* Aplica a cor do texto principal */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s; /* Transição suave para a troca de tema */
+}
+
+.container {
+    width: 400px;
+    /* Aplica a variável de fundo do container */
+    background: var(--color-container-bg); 
+    padding: 20px;
+    border-radius: 10px;
+    /* Usa a variável de sombra */
+    box-shadow: 0px 0px 10px var(--color-shadow); 
+    text-align: center;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+/* Logo (Sem alterações necessárias para o tema) */
+.logo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.logo img {
+    height: 60px;
+}
+
+/* Select (Lista Suspensa) */
+select {
+    width: 100%; 
+    box-sizing: border-box; 
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: none;
+    /* Usa a variável de cor de fundo de input */
+    background-color: var(--color-input-bg); 
+    color: var(--color-text-main); /* Garante que o texto dentro do select mude de cor */
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Caixa de Texto */
+textarea {
+    width: 100%; 
+    box-sizing: border-box; 
+    height: 150px;
+    padding: 10px;
+    /* Usa a variável de cor de borda */
+    border: 2px solid var(--color-border); 
+    border-radius: 10px;
+    resize: none;
+    font-size: 14px;
+    margin-bottom: 15px;
+    /* Adicionado cor do texto e fundo para tema escuro */
+    background-color: var(--color-container-bg); 
+    color: var(--color-text-main);
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+/* Botão */
+button {
+    /* Usa a variável de cor de fundo do botão */
+    background-color: var(--color-button-bg); 
+    color: var(--color-button-font); /* Mantido branco para alto contraste */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    /* Usa a variável de cor de hover do botão */
+    background-color: var(--color-button-hover);
+    color: var(--color-text-hover)
+}
+
+/* Área de resultado */
+.resultado {
+    /* CORREÇÃO: Usado box-sizing para alinhamento */
+    width: 100%; 
+    box-sizing: border-box; 
+    height: 150px;
+    /* Usa a variável de cor de borda */
+    border: 2px solid var(--color-border); 
+    border-radius: 10px;
+    padding: 10px;
+    /* Adicionado cor do texto e fundo para tema escuro */
+    background-color: var(--color-container-bg); 
+    color: var(--color-text-main);
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+/* ================================================= */
+/* CORREÇÃO DE LAYOUT: BOX-SIZING GLOBAL */
+/* ================================================= */
+
+/* Garante que o padding e a borda sejam incluídos na largura de 100% */
+* {
+    box-sizing: border-box; 
+}/* ================================================= */
+/* 1. VARIÁVEIS CSS E MODO PADRÃO (CLARO) */
+/* ================================================= */
+
+:root {
+    /* Cores do Tema CLARO */
+    --color-page-bg: #fefefe;        /* Fundo da página */
+    --color-container-bg: #fff;      /* Fundo do container */
+    --color-text-main: #000000;      /* Cor principal do texto */
+    --color-border: #ddd;            /* Cor da borda das caixas de texto */
+    --color-input-bg: #ccd8f0;       /* Fundo do select/input */
+    --color-button-bg: #00003d;      /* Fundo do botão principal */
+    --color-button-hover: #003bb3;   /* Fundo do botão hover */
+    --color-shadow: rgba(0, 0, 0, 0.1); /* Sombra do container */
+    --color-button-font: #ccd8f0;
+    --color-text-hover: #fefefe;
+}
+
+/* ================================================= */
+/* 2. MODO ESCURO (SOBRESCREVE AS VARIÁVEIS) */
+/* ================================================= */
+
+body.dark-theme {
+    /* Cores do Tema ESCURO */
+    --color-page-bg: #00003d;
+    --color-container-bg: #00003d;
+    --color-text-main: #fff;
+    --color-border: #444;
+    --color-input-bg: #444;
+    --color-button-bg: #ccd8f0;
+    --color-button-hover: #003bb3;
+    --color-shadow: rgba(255, 255, 255, 0.1);
+    --color-button-font: #444;
+    --color-text-hover: #fefefe;
+}
+
+/* ================================================= */
+/* 3. ESTILOS GERAIS (USANDO AS VARIÁVEIS) */
+/* ================================================= */
+
+body {
+    font-family: Arial, sans-serif;
+    /* Aplica a variável de cor de fundo da página */
+    background-color: var(--color-page-bg); 
+    color: var(--color-text-main); /* Aplica a cor do texto principal */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s; /* Transição suave para a troca de tema */
+}
+
+.container {
+    width: 400px;
+    /* Aplica a variável de fundo do container */
+    background: var(--color-container-bg); 
+    padding: 20px;
+    border-radius: 10px;
+    /* Usa a variável de sombra */
+    box-shadow: 0px 0px 10px var(--color-shadow); 
+    text-align: center;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+/* Logo (Sem alterações necessárias para o tema) */
+.logo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.logo img {
+    height: 60px;
+}
+
+/* Select (Lista Suspensa) */
+select {
+    width: 100%; 
+    box-sizing: border-box; 
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: none;
+    /* Usa a variável de cor de fundo de input */
+    background-color: var(--color-input-bg); 
+    color: var(--color-text-main); /* Garante que o texto dentro do select mude de cor */
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Caixa de Texto */
+textarea {
+    width: 100%; 
+    box-sizing: border-box; 
+    height: 150px;
+    padding: 10px;
+    /* Usa a variável de cor de borda */
+    border: 2px solid var(--color-border); 
+    border-radius: 10px;
+    resize: none;
+    font-size: 14px;
+    margin-bottom: 15px;
+    /* Adicionado cor do texto e fundo para tema escuro */
+    background-color: var(--color-container-bg); 
+    color: var(--color-text-main);
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+/* Botão */
+button {
+    /* Usa a variável de cor de fundo do botão */
+    background-color: var(--color-button-bg); 
+    color: var(--color-button-font); /* Mantido branco para alto contraste */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    /* Usa a variável de cor de hover do botão */
+    background-color: var(--color-button-hover);
+    color: var(--color-text-hover)
+}
+
+/* Área de resultado */
+.resultado {
+    /* CORREÇÃO: Usado box-sizing para alinhamento */
+    width: 100%; 
+    box-sizing: border-box; 
+    height: 150px;
+    /* Usa a variável de cor de borda */
+    border: 2px solid var(--color-border); 
+    border-radius: 10px;
+    padding: 10px;
+    /* Adicionado cor do texto e fundo para tema escuro */
+    background-color: var(--color-container-bg); 
+    color: var(--color-text-main);
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+/* ================================================= */
+/* CORREÇÃO DE LAYOUT: BOX-SIZING GLOBAL */
+/* ================================================= */
+
+/* Garante que o padding e a borda sejam incluídos na largura de 100% */
+* {
+    box-sizing: border-box; 
+}
