@@ -1,0 +1,6 @@
+Projetofinal_librese_BackAndFront/venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tradutor PT-BR para LIBRAS</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Cabeçalho -->
+        <div class="header">
+            <img id="app-logo" src="/static/logo_claro.png" alt="Logo Libre-se">
+            <button id="theme-toggle-btn">☀︎</button>
+        </div>
+
+        <!-- Interface de Tradução -->
+        <div class="translation-interface">
+            <!-- Área de Input -->
+            <div class="input-area">
+                <select>
+                    <option>Português (Brasil)</option>
+                </select>
+                <textarea id="texto-pt" placeholder="Digite aqui..."></textarea>
+                <div class="buttons">
+                    <button id="apagar">Apagar</button>
+                    <button id="traduzir">Traduzir</button>
+                </div>
+            </div>
+
+            <!-- Área de Output -->
+            <div class="output-area">
+                <select>
+                    <option>Língua Brasileira de Sinais (LIBRAS)</option>
+                </select>
+                <div class="resultado" id="libras-output"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle Tema (claro/escuro)
+        const toggleBtn = document.getElementById('theme-toggle-btn');
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            toggleBtn.textContent = '☾';  // Ícone para escuro (ajuste se quiser)
+        }
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                toggleBtn.textContent = '☾';
+            } else {
+                localStorage.setItem('theme', 'light');
+                toggleBtn.textContent = '☀︎';
+            }
+        });
+
+        // Apagar
+        document.getElementById('apagar').addEventListener('click', () => {
+            document.getElementById('texto-pt').value = '';
+            document.getElementById('libras-output').innerHTML = '';
+        });
+
+        // Traduzir
+        document.getElementById('traduzir').addEventListener('click', async () => {
+            const texto = document.getElementById('texto-pt').value.trim();
+            if (!texto) return alert('Digite um texto!');
+            try {
+                const response = await fetch('/traduzir_texto', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ texto })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const output = document.getElementById('libras-output');
+                    output.innerHTML = '';
+                    data.videos.forEach(url => {
+                        const elem = url.endsWith('.gif') ? document.createElement('img') : document.createElement('video');
+                        elem.src = url;
+                        if (elem.tagName === 'VIDEO') {
+                            elem.autoplay = true;
+                            elem.loop = true;
+                            elem.muted = true;
+                        }
+                        output.appendChild(elem);
+                    });
+                } else {
+                    alert('Erro na tradução!');
+                }
+            } catch (error) {
+                alert('Erro: ' + error.message);
+            }
+        });
+    </script>
+</body>
+
+</html>
