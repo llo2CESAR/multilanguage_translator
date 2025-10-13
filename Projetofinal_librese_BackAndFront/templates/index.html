@@ -2,40 +2,17 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
     <title>Tradutor PT-BR para LIBRAS</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-        /* pequenos estilos para melhor visual */
-        .resultado {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
-            margin-top: 12px;
-        }
 
-        .resultado img,
-        .resultado video {
-            max-width: 320px;
-            height: auto;
-            border-radius: 6px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-        }
-
-        .placeholder {
-            color: #666;
-            font-size: 0.95rem
-        }
-    </style>
 </head>
 
 <body>
     <div class="container">
         <div class="header">
             <img id="app-logo" src="/static/logo_claro.png" alt="Logo Libre-se">
-            <button id="theme-toggle-btn">☀︎</button>
+            <button id="theme-toggle-btn" aria-label="Alternar tema">☀︎</button>
         </div>
 
         <div class="translation-interface">
@@ -45,8 +22,8 @@
                 </select>
                 <textarea id="texto-pt" placeholder="Digite aqui..."></textarea>
                 <div class="buttons">
-                    <button id="apagar">Apagar</button>
-                    <button id="traduzir">Traduzir</button>
+                    <button id="apagar" type="button">Apagar</button>
+                    <button id="traduzir" type="button">Traduzir</button>
                 </div>
             </div>
 
@@ -57,16 +34,18 @@
                 <div class="resultado" id="libras-output">
 
                 </div>
+
             </div>
         </div>
     </div>
-
+    <div class="footer">
+        Desenvolvido por Grupo 04 • Inspirado no VLIBRAS • CESAR © 2025
+    </div>
     <script>
-        /* --- utilitários --- */
         function normalizeToken(s) {
             return s
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
-                .replace(/[^\p{L}\p{N}\s]/gu, '')                 // remove pontuação
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^\p{L}\p{N}\s]/gu, '')
                 .trim()
                 .toLowerCase();
         }
@@ -118,10 +97,10 @@
             }
         }
 
-        /* --- lógica greedy n-gram --- */
+
         const output = document.getElementById('libras-output');
         const STATIC_BASE = window.location.origin + '/static/Gifs/';
-        const MAX_NGRAM = 4; // tenta até 4 palavras (ajuste conforme seus arquivos)
+        const MAX_NGRAM = 4;
 
         async function findGifsGreedy(text) {
             const norm = normalizeToken(text);
@@ -135,7 +114,7 @@
                 for (let n = maxN; n >= 1; n--) {
                     const slice = words.slice(i, i + n);
                     const phrase = slice.join(' ');
-                    // candidate filenames: phrase, phrase with underscore, phrase joined
+
                     const candidates = [
                         `${STATIC_BASE}${encodeURIComponent(phrase)}.gif`,
                         `${STATIC_BASE}${encodeURIComponent(phrase.replace(/\s+/g, '_'))}.gif`,
@@ -154,14 +133,19 @@
                     }
                 }
                 if (!matched) {
-                    // nada casou neste ponto; pular palavra
                     i += 1;
                 }
             }
             return results;
         }
 
-        /* --- handler do botão traduzir --- */
+
+        document.getElementById('apagar').addEventListener('click', () => {
+            document.getElementById('texto-pt').value = '';
+            output.innerHTML = '';
+
+        });
+
         document.getElementById('traduzir').addEventListener('click', async () => {
             const texto = document.getElementById('texto-pt').value || '';
             if (!texto.trim()) return alert('Digite um texto!');
@@ -173,7 +157,6 @@
             if (found.length > 0) {
                 // renderizar na ordem
                 found.forEach(it => renderMedia(output, it.url));
-                // garantir que não quebre o layout — seu CSS já controla isso
                 return;
             }
 
@@ -210,8 +193,34 @@
                 output.innerHTML = `<div class="placeholder">Erro na chamada: ${err.message}</div>`;
             }
         });
-    </script>
 
+        /* ---------------------
+           Toggle de Tema (claro / escuro)
+           --------------------- */
+        (function initThemeToggle() {
+            const toggleBtn = document.getElementById('theme-toggle-btn');
+            if (!toggleBtn) return;
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                toggleBtn.textContent = '☾';
+            } else {
+                toggleBtn.textContent = '☀︎';
+            }
+
+            toggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('theme', 'dark');
+                    toggleBtn.textContent = '☾';
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    toggleBtn.textContent = '☀︎';
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>

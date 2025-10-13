@@ -15,6 +15,11 @@
     --result-bg: #e6f2ff;
 }
 
+.footer {
+    text-align-last: center;
+
+}
+
 /* -------------------------------------- */
 /* VARIÁVEIS CSS (MODO ESCURO) */
 /* -------------------------------------- */
@@ -79,17 +84,6 @@ body {
     height: auto;
 }
 
-#theme-toggle-btn {
-    padding: 10px 15px;
-    font-size: 1.2em;
-    cursor: pointer;
-    border: none;
-    border-radius: 50%;
-    background-color: var(--toggle);
-    color: var(--text-color);
-    transition: background-color 0.3s, color 0.3s;
-}
-
 /* -------------------------------------- */
 /* Layout Horizontal (Interface de Tradução) */
 /* -------------------------------------- */
@@ -137,29 +131,63 @@ textarea {
 /* Botões */
 
 #theme-toggle-btn {
-    width: 40px;
-    /* Largura fixa para padronizar */
-    height: 40px;
-    /* Altura fixa para padronizar */
-    font-size: 24px;
-    /* Tamanho do ícone fixo */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    /* Remove padding extra que pode variar */
-    border-radius: 50%;
-    /* Mantém circular */
-    background-color: var(--toggle);
-    color: var(--text-color);
-    border: none;
+    padding: 10px 18px;
+    font-size: 1.2em;
     cursor: pointer;
+    border: none;
+    border-radius: 50%;
+    color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
 }
+
+
 
 #theme-toggle-btn:hover {
     filter: brightness(1.1);
     /* Efeito hover opcional */
+}
+
+.resultado {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+
+}
+
+.resultado img,
+.resultado video {
+    max-width: 320px;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.placeholder {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e6e6e6;
+}
+
+body.dark-mode textarea,
+body.dark-mode select,
+body.dark-mode button {
+    background-color: #1e1e1e;
+    color: #e6e6e6;
+    border-color: #333;
+}
+
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
 }
 
 .buttons {
