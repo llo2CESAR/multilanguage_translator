@@ -6,19 +6,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tradutor PT-BR para LIBRAS</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* pequenos estilos para melhor visual */
+        .resultado {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .resultado img,
+        .resultado video {
+            max-width: 320px;
+            height: auto;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+        }
+
+        .placeholder {
+            color: #666;
+            font-size: 0.95rem
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
-        <!-- Cabeçalho -->
         <div class="header">
             <img id="app-logo" src="/static/logo_claro.png" alt="Logo Libre-se">
             <button id="theme-toggle-btn">☀︎</button>
         </div>
 
-        <!-- Interface de Tradução -->
         <div class="translation-interface">
-            <!-- Área de Input -->
             <div class="input-area">
                 <select>
                     <option>Português (Brasil)</option>
@@ -30,73 +50,168 @@
                 </div>
             </div>
 
-            <!-- Área de Output -->
             <div class="output-area">
                 <select>
                     <option>Língua Brasileira de Sinais (LIBRAS)</option>
                 </select>
-                <div class="resultado" id="libras-output"></div>
+                <div class="resultado" id="libras-output">
+
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Toggle Tema (claro/escuro)
-        const toggleBtn = document.getElementById('theme-toggle-btn');
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark-mode');
-            toggleBtn.textContent = '☾';  // Ícone para escuro (ajuste se quiser)
+        /* --- utilitários --- */
+        function normalizeToken(s) {
+            return s
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+                .replace(/[^\p{L}\p{N}\s]/gu, '')                 // remove pontuação
+                .trim()
+                .toLowerCase();
         }
-        toggleBtn.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            if (document.body.classList.contains('dark-mode')) {
-                localStorage.setItem('theme', 'dark');
-                toggleBtn.textContent = '☾';
-            } else {
-                localStorage.setItem('theme', 'light');
-                toggleBtn.textContent = '☀︎';
-            }
-        });
 
-        // Apagar
-        document.getElementById('apagar').addEventListener('click', () => {
-            document.getElementById('texto-pt').value = '';
-            document.getElementById('libras-output').innerHTML = '';
-        });
-
-        // Traduzir
-        document.getElementById('traduzir').addEventListener('click', async () => {
-            const texto = document.getElementById('texto-pt').value.trim();
-            if (!texto) return alert('Digite um texto!');
+        async function existsHead(url) {
             try {
-                const response = await fetch('/traduzir_texto', {
+                const res = await fetch(url, { method: 'HEAD' });
+                return res.ok;
+            } catch (e) {
+                return await existsByLoading(url);
+            }
+        }
+
+        function existsByLoading(url, timeout = 3000) {
+            return new Promise(resolve => {
+                const img = new Image();
+                let done = false;
+                const finish = (val) => { if (!done) { done = true; resolve(val); } };
+                const t = setTimeout(() => finish(false), timeout);
+                img.onload = () => { clearTimeout(t); finish(true); };
+                img.onerror = () => { clearTimeout(t); finish(false); };
+                img.src = url;
+            });
+        }
+
+        function renderMedia(container, url) {
+            const lower = url.toLowerCase();
+            if (lower.endsWith('.gif') || lower.endsWith('.webp')) {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'GIF Libras';
+                img.loading = 'lazy';
+                container.appendChild(img);
+            } else if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.includes('video')) {
+                const v = document.createElement('video');
+                v.src = url;
+                v.autoplay = true;
+                v.loop = true;
+                v.muted = true;
+                v.controls = true;
+                container.appendChild(v);
+            } else {
+                const a = document.createElement('a');
+                a.href = url;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.textContent = 'Abrir recurso de Libras';
+                container.appendChild(a);
+            }
+        }
+
+        /* --- lógica greedy n-gram --- */
+        const output = document.getElementById('libras-output');
+        const STATIC_BASE = window.location.origin + '/static/Gifs/';
+        const MAX_NGRAM = 4; // tenta até 4 palavras (ajuste conforme seus arquivos)
+
+        async function findGifsGreedy(text) {
+            const norm = normalizeToken(text);
+            if (!norm) return [];
+            const words = norm.split(/\s+/).filter(Boolean);
+            const results = [];
+            let i = 0;
+            while (i < words.length) {
+                let matched = false;
+                const maxN = Math.min(MAX_NGRAM, words.length - i);
+                for (let n = maxN; n >= 1; n--) {
+                    const slice = words.slice(i, i + n);
+                    const phrase = slice.join(' ');
+                    // candidate filenames: phrase, phrase with underscore, phrase joined
+                    const candidates = [
+                        `${STATIC_BASE}${encodeURIComponent(phrase)}.gif`,
+                        `${STATIC_BASE}${encodeURIComponent(phrase.replace(/\s+/g, '_'))}.gif`,
+                        `${STATIC_BASE}${encodeURIComponent(phrase.replace(/\s+/g, ''))}.gif`
+                    ];
+                    for (const c of candidates) {
+                        if (await existsHead(c)) {
+                            results.push({ phrase, url: c });
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (matched) {
+                        i += n;
+                        break;
+                    }
+                }
+                if (!matched) {
+                    // nada casou neste ponto; pular palavra
+                    i += 1;
+                }
+            }
+            return results;
+        }
+
+        /* --- handler do botão traduzir --- */
+        document.getElementById('traduzir').addEventListener('click', async () => {
+            const texto = document.getElementById('texto-pt').value || '';
+            if (!texto.trim()) return alert('Digite um texto!');
+            output.innerHTML = '<div class="placeholder">Procurando GIFs locais…</div>';
+
+            const found = await findGifsGreedy(texto);
+
+            output.innerHTML = '';
+            if (found.length > 0) {
+                // renderizar na ordem
+                found.forEach(it => renderMedia(output, it.url));
+                // garantir que não quebre o layout — seu CSS já controla isso
+                return;
+            }
+
+            // fallback: chamar backend
+            output.innerHTML = '<div class="placeholder">Nenhum GIF local encontrado — consultando a API...</div>';
+            try {
+                const resp = await fetch('/traduzir_texto', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ texto })
                 });
-                if (response.ok) {
-                    const data = await response.json();
-                    const output = document.getElementById('libras-output');
-                    output.innerHTML = '';
-                    data.videos.forEach(url => {
-                        const elem = url.endsWith('.gif') ? document.createElement('img') : document.createElement('video');
-                        elem.src = url;
-                        if (elem.tagName === 'VIDEO') {
-                            elem.autoplay = true;
-                            elem.loop = true;
-                            elem.muted = true;
-                        }
-                        output.appendChild(elem);
-                    });
-                } else {
-                    alert('Erro na tradução!');
+                if (!resp.ok) {
+                    const txt = await resp.text().catch(() => resp.statusText);
+                    output.innerHTML = `<div class="placeholder">Erro do servidor: ${resp.status} — ${txt}</div>`;
+                    return;
                 }
-            } catch (error) {
-                alert('Erro: ' + error.message);
+                const data = await resp.json();
+                output.innerHTML = '';
+                if (Array.isArray(data.videos) && data.videos.length) {
+                    data.videos.forEach(url => {
+                        if (url.startsWith('/')) url = window.location.origin + url;
+                        renderMedia(output, url);
+                    });
+                    return;
+                }
+                if (data.fileUrl) {
+                    let url = data.fileUrl;
+                    if (url.startsWith('/')) url = window.location.origin + url;
+                    renderMedia(output, url);
+                    return;
+                }
+                output.innerHTML = '<div class="placeholder">Nenhum resultado recebido da API.</div>';
+            } catch (err) {
+                output.innerHTML = `<div class="placeholder">Erro na chamada: ${err.message}</div>`;
             }
         });
     </script>
+
 </body>
 
 </html>

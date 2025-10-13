@@ -65,6 +65,22 @@ body {
     gap: 20px;
 }
 
+.resultado {
+    display: flex;
+    flex-wrap: nowrap;
+    /* NÃO quebra em várias linhas */
+    gap: 12px;
+    align-items: center;
+    overflow-x: auto;
+    /* rolagem horizontal se necessário */
+    padding: 8px;
+    min-height: 120px;
+    /* evita que o placeholder pule ao inserir mídias */
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+
 /* -------------------------------------- */
 /* Cabeçalho */
 /* -------------------------------------- */

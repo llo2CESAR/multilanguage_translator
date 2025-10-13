@@ -1,15 +1,31 @@
-from src.domain.repositories.libras_repository import ILibrasRepository
 from typing import Dict
+from src.domain.repositories.libras_repository import ILibrasRepository
 
 class InMemoryLibrasRepository(ILibrasRepository):
     def __init__(self):
+        # Use keys normalized (lowercase, sem acento, sem pontuação)
+        # e filenames padronizados em lowercase com underscores (recomendado)
         self._mappings: Dict[str, str] = {
-            "olá": "https://tenor.com/pt-BR/view/oi-libras-gif-22471245",
-            "tudo bem": "https://media.giphy.com/media/v1.Y2lkPTc5MGIyZTBjMDBlMzYwNTU5OWFhYjliZDU4Mjc1NjU1NWQ2ZmFkMjA1ZDNjYTdmYSZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/Yq4dI1u73mQ4f3jM6o/giphy.gif",
-            "obrigado": "https://media.giphy.com/media/v1.Y2lkPTc5MGIyZTBjY2ZlYzVkYzY4YTc5YTRiMTM5ZTY4ZWRkODU3MzEyYjlkZTljODAxNiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/d2j9G7x3G3z9F9yqC/giphy.gif",
-            "como": "https://media.giphy.com/media/v1.Y2lkPTc5MGIyZTBjYjIxN2U2YmFhZjNlZjI2ZDYxMDc5YmIwZmMwYjY0ZDIxZmIxOTY2YyZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/Lq4v4r8KxJ3i8/giphy.gif",
-            "bem vindo": "https://media.giphy.com/media/v1.Y2lkPTc5MGIyZTBjNjFjMWUyNzNlYmI0MjAwZTE1OWExODVjMTYzNDFhNGMyYmE1N2YxMSZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/d2j9G7x3G3z9F9yqC/giphy.gif"
+            "oi": "/static/Gifs/oi.gif",
+            "ok": "/static/Gifs/ok.gif",
+            "boa noite": "/static/Gifs/boa_noite.gif",
+            "boa_noite": "/static/Gifs/boa_noite.gif",
+            "boanoite": "/static/Gifs/boa_noite.gif",
+            "boa-tarde": "/static/Gifs/boa_tarde.gif",
+            "bom dia": "/static/Gifs/bom_dia.gif",
+            "bom_dia": "/static/Gifs/bom_dia.gif",
+            "de nada": "/static/Gifs/de_nada.gif",
+            "de_nada": "/static/Gifs/de_nada.gif",
+            "legal": "/static/Gifs/legal.gif",
+            "meu nome e": "/static/Gifs/meu_nome_e.gif",
+            "meu_nome_e": "/static/Gifs/meu_nome_e.gif",
+            "obrigado": "/static/Gifs/obrigado.gif",
+            "por favor": "/static/Gifs/por_favor.gif",
+            "por_favor": "/static/Gifs/por_favor.gif",
+            "tchau": "/static/Gifs/tchau.gif",
+            "prazer em te conhecer": "/static/Gifs/prazer_em_te_conhecer.gif",
+            "qual e o seu nome": "/static/Gifs/qual_e_o_seu_nome.gif"
         }
 
     def get_all_mappings(self) -> Dict[str, str]:
-        return self._mappings.copy()  # Retorna cópia para imutabilidade
+        return self._mappings.copy()
