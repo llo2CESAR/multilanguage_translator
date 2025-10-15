@@ -1,72 +1,63 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8" />
-    <title>Tradutor para Libras</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        #videos img {
-            max-width: 150px;
-            margin: 5px;
-        }
-
-        textarea {
-            width: 100%;
-            max-width: 600px;
-        }
-
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Tradutor LIBRAS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
 <body>
-    <h1>Tradutor de Texto para Libras</h1>
-    <textarea id="texto" rows="4" placeholder="Digite o texto aqui..."></textarea><br />
-    <button id="btnTraduzir">Traduzir</button>
-    <h2>Vídeos em Libras:</h2>
-    <div id="videos"></div>
-    <script>
-        document.getElementById('btnTraduzir').addEventListener('click', () => {
-            const texto = document.getElementById('texto').value.trim();
-            if (!texto) {
-                alert('Por favor, digite um texto para traduzir.');
-                return;
-            }
-            fetch('/traduzir_texto', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ texto })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    const container = document.getElementById('videos');
-                    container.innerHTML = '';
-                    if (data.videos && data.videos.length > 0) {
-                        data.videos.forEach(url => {
-                            const img = document.createElement('img');
-                            img.src = url;
-                            img.alt = 'Vídeo Libras';
-                            container.appendChild(img);
-                        });
-                    } else {
-                        container.textContent = 'Nenhum vídeo encontrado para o texto informado.';
-                    }
-                })
-                .catch(err => {
-                    alert('Erro ao traduzir o texto.');
-                    console.error(err);
-                });
-        });
-    </script>
-</body>
+    <div class="container">
+        <div class="header">
+            <img id="app-logo" src="/static/images/logo_claro.png" alt="Logo Libre-se">
+            <button id="theme-toggle-btn">☀︎</button>
+        </div>
 
+        <div class="translation-interface">
+            
+            <div class="input-area">
+                <select id="lang-origem">
+                    <option value="pt-br">Português (Brasil)</option>
+                </select>
+                <textarea id="textInput" placeholder="Digite aqui..."></textarea>
+                <div class="buttons">
+                    <button id="btn-apagar">Apagar</button>
+                    <button id="btn-traduzir" onclick="traduzirTexto()">Traduzir</button>
+                </div>
+            </div>
+
+            <div class="output-area">
+  <select id="lang-destino">
+    <option value="libras">Língua Brasileira de Sinais (LIBRAS)</option>
+  </select>
+
+  <!-- Caixa azul -->
+  <div id="caixa-traducao-video" class="resultado video-placeholder center-vlibras">
+    <p>A tradução em LIBRAS (vídeo) aparecerá aqui.</p>
+</div>
+
+
+    <!-- Widget VLibras DENTRO da caixa azul -->
+    <div vw class="enabled">
+      <div vw-access-button class="active"></div>
+      <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+      </div>
+    </div>
+    <!-- Fim do Widget VLibras -->
+  </div>
+</div>
+
+</div> 
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+<!-- Scripts do VLibras (permanecem fora da div azul) -->
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>
+  new window.VLibras.Widget('https://vlibras.gov.br/app');
+</script>
+
+
+    </body>
 </html>

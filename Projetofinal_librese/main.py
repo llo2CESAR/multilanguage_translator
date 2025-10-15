@@ -1,109 +1,71 @@
-from flask import Flask, request, jsonify, render_template
-from bd import Dicionario_libras
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
-from service.texto import traduzir_texto_para_libras
-from service.libras import processar_dados_libras
-from service.voz import reconhecer_voz, traduzir_texto_para_libras
-from service.translator import traduzir_texto_para_libras_service
+import requests
+import requests.exceptions # Garantir que está importado para o try/except
 
-app = Flask(__name__, template_folder='templates')
-CORS(app) 
+# Importe seu dicionário local
+from source.infrastructure.persistence.bd import dicionario_libras
+
+app = Flask(__name__, template_folder="templates")
+CORS(app)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/traduzir', methods=['POST']) #API para receber dados em libras e retornar texto
-def traduzir_libras_para_texto():
-    try:
-        dados_brutos = request.files.get('sinal_libras')
-        if not dados_brutos:
-            dados_brutos = request.data or request.json
-        if not dados_brutos:
-            return jsonify({"erro"})
-        
-        texto_resultado = processar_dados_libras(dados_brutos) #chamando o processamento importado de libras.py
-        return jsonify({"texto": texto_resultado})
 
-"""@app.route('/traduzir_texto', methods=['POST'])
-def traduzir_texto_para_libras():
-    data = request.get_json()
-    if not data or 'texto' not in data:
-        return jsonify({"error": "Nenhum texto fornecido"}), 400
+# repository = InMemoryLibrasRepository()
+# translate_use_case = TranslateTextToLibrasUseCase(repository)
+# TranslationController(translate_use_case)
+# app.register_blueprint(translation_bp)
 
-    texto = data['texto'].lower().strip()
-    if not texto:
-        return jsonify({"videos": []})
-
-    palavras = texto.split()
-
-    # ordenar chaves por número de palavras (maior -> menor) para combinar frases antes de palavras únicas
-    chaves_ordenadas = sorted(Dicionario_libras.keys(), key=lambda k: -len(k.split()))
-
-    urls_videos = []
-    i = 0
-    while i < len(palavras):
-        encontrado = False
-        for chave in chaves_ordenadas:
-            chave_palavras = chave.split()
-            if i + len(chave_palavras) <= len(palavras) and palavras[i:i + len(chave_palavras)] == chave_palavras:
-                url = Dicionario_libras.get(chave)
-                if url:
-                    urls_videos.append(url)
-                i += len(chave_palavras)
-                encontrado = True
-                break
-        if not encontrado:
-            url = Dicionario_libras.get(palavras[i])
-            if url:
-                urls_videos.append(url)
-            i += 1
-
-    return jsonify({"videos": urls_videos})"""
-
-@app.route('/dicionario_libras', methods=['GET'])
-def obter_dicionario():
-    return jsonify(Dicionario_libras)
-
-"""@app.route('/traduzir_libras_para_texto', methods=['POST'])
-def traduzir_libras_para_texto():
-
-    return jsonify({"texto": ""})"""
-
-@app.route('/voz-para-libras', methods=['POST']) #API paara receber audio, transcrever e gerar os videos
-def traduzir_voz_para_libras():
+@app.route('/api/translate', methods=['POST'])
+def translate_to_libras():
+    text_input = ""
+    normalized_text = ""
     
     try:
-        
-        dados_audio = request.files.get('audio_file') #receber o arquivo
-        
-        if not dados_audio:
-            return jsonify({"erro": "Nenhum arquivo de áudio foi enviado."}, 400)
-        
-       
-        texto_transcrito = reconhecer_voz(dados_audio) #para reconhecer a voz
-        
-        if not texto_transcrito:
-            return jsonify({"erro": "Não foi possível transcrever a voz."}, 400)
+        data = request.get_json()
+        text_input = data.get('text', '')
+        normalized_text = text_input.strip().lower() # Normaliza para o dicionário local
+
+        if not normalized_text:
+            return jsonify({'error': 'Texto não informado'}), 400
+
+        # 1. TENTATIVA COM A API EXTERNA (VLibras)
+        try:
+            response = requests.post(
+                "https://traducao.vlibras.gov.br/api/v1/translate",
+                json={"text": text_input, "locale": "pt-br"},
+                timeout=5 # Adiciona timeout
+            )
+
+            if response.status_code == 200:
+                # SUCESSO na API VLibras
+                return jsonify(response.json())
             
-        
-        videos_libras = traduzir_texto_para_libras(texto_transcrito)
+            # Se a API retornou um erro (incluindo o 404), tratamos como falha e tentamos o fallback
+            print(f"DEBUG: VLibras API retornou status {response.status_code}. Tentando dicionário local.")
+
+        except requests.exceptions.RequestException as e:
+            # Erro de conexão de rede ou timeout
+            print(f"DEBUG: Erro de conexão com VLibras API ({e.__class__.__name__}). Tentando dicionário local.")
+            pass 
 
         
-        return jsonify({
-            "texto_original": texto_transcrito,
-            "videos": videos_libras
-        }) #retornar em JSON e a lista de links para os videos
-
-    except Exception as e: #tratamento de erros
+        # 2. TENTATIVA COM O DICIONÁRIO INTERNO
+        if normalized_text in dicionario_libras:
+            # SUCESSO no dicionário local
+            video_url = dicionario_libras[normalized_text]
+            # O JS espera a chave 'result'
+            return jsonify({"result": video_url})
         
-        print(f"Erro durante a tradução de voz para LIBRAS: {e}")
-        return jsonify({"erro": f"Erro do servidor: {str(e)}"}, 500)
+        # 3. FALHA TOTAL
+        error_detail = f"Status code: {response.status_code}" if 'response' in locals() else "Erro de rede."
+        return jsonify({'error': f'Tradução falhou. A API VLibras está inacessível ({error_detail}) e o texto não está no dicionário local.'}), 503
 
-"""@app.route('/traduzir_voz_para_libras', methods=['POST'])
-def traduzir_voz_para_libras():
-    return jsonify({"videos": []})"""
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
 if __name__ == '__main__':
-   
     app.run(debug=True)
